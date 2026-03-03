@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Health Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 25%, #e2e8f0 50%, #cbd5e1 75%, #94a3b8 100%);
+            min-height: 100vh;
+            padding: 12px;
+            line-height: 1.4;
+        }
+
+        .container {
+            max-width: 380px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            font-size: 12px;
+            color: #0f766e;
+            z-index: 100;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 6px 14px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* Main Card */
+        .main-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Tab System */
+        .tab-nav {
+            display: flex;
+            gap: 3px;
+            margin-bottom: 18px;
+            background: rgba(255, 255, 255, 0.25);
+            padding: 4px;
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 12px;
+            background: transparent;
+            color: #0f766e;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+            letter-spacing: 0.2px;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Slider System */
+        .slider-container {
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .slider-label {
+            color: #0f766e;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.1px;
+        }
+
+        .slider-value {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 14px;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 3px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .slider {
+            width: 100%;
+            height: 14px;
+            border-radius: 8px;
+            background: rgba(203, 213, 225, 0.6);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.6);
+            border: 3px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb:active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.8);
+        }
+
+        /* Results Display */
+        .results-box {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            border-radius: 18px;
+            padding: 18px;
+            margin-top: 16px;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .results-title {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f766e;
+            margin-bottom: 16px;
+            letter-spacing: 0.2px;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 14px;
+            border-radius: 14px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #0d9488;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .metric-value {
+            font-size: 17px;
+            font-weight: 800;
+            color: #0f766e;
+            letter-spacing: -0.3px;
+        }
+
+        .metric-large {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            padding: 16px;
+        }
+
+        .metric-large .metric-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .metric-large .metric-value {
+            color: white;
+            font-size: 24px;
+        }
+
+        /* Natural Compound Recommendations */
+        .compound-card {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 14px;
+            border-radius: 14px;
+            margin: 8px 0;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .compound-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f766e;
+            margin-bottom: 6px;
+        }
+
+        .compound-benefit {
+            font-size: 13px;
+            color: #0d9488;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        /* Achievement System */
+        .achievement-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 11px;
+            font-weight: 700;
+            margin: 4px 3px;
+            box-shadow: 0 3px 12px rgba(16, 185, 129, 0.4);
+            letter-spacing: 0.1px;
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+            touch-action: manipulation;
+            letter-spacing: 0.2px;
+            box-shadow: 0 3px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .main-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+            
+            .tab-btn {
+                padding: 9px 6px;
+                font-size: 11px;
+            }
+            
+            .slider {
+                height: 16px;
+            }
+            
+            .slider::-webkit-slider-thumb {
+                width: 30px;
+                height: 30px;
+            }
+            
+            .metric-grid {
+                gap: 8px;
+            }
+            
+            .metric-card {
+                padding: 12px;
+            }
+            
+            .slider-container {
+                padding: 14px;
+                margin-bottom: 14px;
+            }
+        }
+
+        /* Animations */
+        @keyframes glow {
+            0% { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5); }
+            100% { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3); }
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="watermark">thehealthybuck.com</div>
+        
+        <div class="main-card">
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="metabolism">Metabolism</button>
+                <button class="tab-btn" data-tab="savings">Food Savings</button>
+                <button class="tab-btn" data-tab="wellness">Wellness</button>
+                <button class="tab-btn" data-tab="progress">Forecast</button>
+            </div>
+
+            <!-- Metabolism Calculator -->
+            <div class="tab-content active" id="metabolism">
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Body Weight</span>
+                        <span class="slider-value" id="weight-val">150 lbs</span>
+                    </div>
+                    <input type="range" class="slider" id="weight-slider" min="90" max="350" value="150">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Activity Level</span>
+                        <span class="slider-value" id="activity-val">Moderate</span>
+                    </div>
+                    <input type="range" class="slider" id="activity-slider" min="1" max="5" value="3">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Weekly Goal</span>
+                        <span class="slider-value" id="goal-val">1 lb</span>
+                    </div>
+                    <input type="range" class="slider" id="goal-slider" min="0" max="3" value="1" step="0.5">
+                </div>
+            </div>
+
+            <!-- Food Savings Calculator -->
+            <div class="tab-content" id="savings">
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Bulk Item Price</span>
+                        <span class="slider-value" id="bulk-price-val">$12.99</span>
+                    </div>
+                    <input type="range" class="slider" id="bulk-price-slider" min="5" max="100" value="12.99" step="0.01">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Servings in Bulk</span>
+                        <span class="slider-value" id="bulk-servings-val">8</span>
+                    </div>
+                    <input type="range" class="slider" id="bulk-servings-slider" min="2" max="30" value="8">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Single Item Price</span>
+                        <span class="slider-value" id="single-price-val">$2.99</span>
+                    </div>
+                    <input type="range" class="slider" id="single-price-slider" min="1" max="15" value="2.99" step="0.01">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Portions You'll Use</span>
+                        <span class="slider-value" id="portions-val">6</span>
+                    </div>
+                    <input type="range" class="slider" id="portions-slider" min="1" max="30" value="6">
+                </div>
+            </div>
+
+            <!-- Wellness Support -->
+            <div class="tab-content" id="wellness">
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Energy Level</span>
+                        <span class="slider-value" id="energy-val">5</span>
+                    </div>
+                    <input type="range" class="slider" id="energy-slider" min="1" max="10" value="5">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Mental Clarity</span>
+                        <span class="slider-value" id="clarity-val">5</span>
+                    </div>
+                    <input type="range" class="slider" id="clarity-slider" min="1" max="10" value="5">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Stress Level</span>
+                        <span class="slider-value" id="stress-val">5</span>
+                    </div>
+                    <input type="range" class="slider" id="stress-slider" min="1" max="10" value="5">
+                </div>
+            </div>
+
+            <!-- Health Forecast -->
+            <div class="tab-content" id="progress">
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Current Weight</span>
+                        <span class="slider-value" id="days-val">180 lbs</span>
+                    </div>
+                    <input type="range" class="slider" id="days-slider" min="100" max="350" value="180">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Target Weight</span>
+                        <span class="slider-value" id="target-val">160 lbs</span>
+                    </div>
+                    <input type="range" class="slider" id="target-slider" min="100" max="350" value="160">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Weekly Deficit</span>
+                        <span class="slider-value" id="consistency-val">3500 cal</span>
+                    </div>
+                    <input type="range" class="slider" id="consistency-slider" min="1000" max="7000" value="3500" step="250">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Daily Calorie Intake</span>
+                        <span class="slider-value" id="adherence-val">1800 cal</span>
+                    </div>
+                    <input type="range" class="slider" id="adherence-slider" min="1200" max="3000" value="1800">
+                </div>
+
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <span class="slider-label">Adherence Rate</span>
+                        <span class="slider-value" id="adherence2-val">85%</span>
+                    </div>
+                    <input type="range" class="slider" id="adherence2-slider" min="50" max="100" value="85">
+                </div>
+            </div>
+
+            <!-- Results Display -->
+            <div class="results-box">
+                <div class="results-title">Live Results</div>
+                <div class="metric-grid" id="metrics-display">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div id="compounds-container"></div>
+                <div id="badges-container"></div>
+                <button class="copy-btn" onclick="copyResults()">Copy Results</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Natural compound database
+        const compounds = {
+            ginseng: {
+                name: "Panax Ginseng",
+                benefits: "Improves mental clarity, reduces fatigue, and enhances working memory performance"
+            },
+            tulsi: {
+                name: "Holy Basil",
+                benefits: "Reduces stress hormones, improves reaction time, and supports cognitive function"
+            },
+            ashwagandha: {
+                name: "Ashwagandha",
+                benefits: "Regulates cortisol levels, improves stress resistance, and enhances quality of life"
+            },
+            astragalus: {
+                name: "Astragalus Root",
+                benefits: "Boosts immunity, supports energy levels, and helps buffer stress effects"
+            },
+            licorice: {
+                name: "Licorice Root",
+                benefits: "Increases energy and endurance while supporting hormone balance"
+            },
+            rhodiola: {
+                name: "Rhodiola Rosea",
+                benefits: "Reduces fatigue, improves mental performance, and decreases stress response"
+            },
+            cordyceps: {
+                name: "Cordyceps Mushroom",
+                benefits: "Enhances physical performance, supports energy metabolism, and reduces fatigue"
+            },
+            reishi: {
+                name: "Reishi Mushroom",
+                benefits: "Supports immune balance, promotes relaxation, and helps regulate sleep cycles"
+            },
+            schisandra: {
+                name: "Schisandra Berry",
+                benefits: "Improves focus and concentration while supporting liver function and mental energy"
+            },
+            turmeric: {
+                name: "Turmeric Root",
+                benefits: "Reduces inflammation, supports brain function, and may help with mood balance"
+            },
+            eleuthero: {
+                name: "Siberian Ginseng",
+                benefits: "Improves physical stamina and mental sharpness without energy crashes"
+            }
+        };
+
+        // Calculation engine
+        const calc = {
+            bmr: (w, m) => Math.round(w * 10 + 6.25 * 170 - 5 * 30 + (m ? 5 : -161)),
+            tdee: (bmr, activity) => Math.round(bmr * [1.2, 1.375, 1.55, 1.725, 1.9][activity - 1]),
+            deficit: (goal) => goal * 500,
+            savings: (bulk, servings, single, portions) => {
+                const bulkCost = (bulk / servings) * portions;
+                const singleCost = single * portions;
+                return {
+                    bulk: bulkCost.toFixed(2),
+                    single: singleCost.toFixed(2),
+                    saved: (singleCost - bulkCost).toFixed(2),
+                    percent: Math.round(((singleCost - bulkCost) / singleCost) * 100)
+                };
+            },
+            progress: (days, target, consistency) => {
+                const completion = Math.round((days / target) * 100);
+                const forecast = Math.round((consistency / 100) * completion);
+                return { completion, forecast };
+            },
+            wellness: (energy, clarity, stress) => {
+                const wellnessScore = Math.round((energy + clarity + (11 - stress)) / 3 * 10);
+                return { score: wellnessScore, energy, clarity, stress };
+            }
+        };
+
+        let currentTab = 'metabolism';
+        let results = {};
+        let achievements = [];
+
+        // Initialize sliders and displays
+        const sliders = {
+            weight: document.getElementById('weight-slider'),
+            activity: document.getElementById('activity-slider'),
+            goal: document.getElementById('goal-slider'),
+            bulkPrice: document.getElementById('bulk-price-slider'),
+            bulkServings: document.getElementById('bulk-servings-slider'),
+            singlePrice: document.getElementById('single-price-slider'),
+            portions: document.getElementById('portions-slider'),
+            energy: document.getElementById('energy-slider'),
+            clarity: document.getElementById('clarity-slider'),
+            stress: document.getElementById('stress-slider'),
+            days: document.getElementById('days-slider'),
+            target: document.getElementById('target-slider'),
+            consistency: document.getElementById('consistency-slider'),
+            adherence: document.getElementById('adherence-slider'),
+            adherence2: document.getElementById('adherence2-slider')
+        };
+
+        const displays = {
+            weight: document.getElementById('weight-val'),
+            activity: document.getElementById('activity-val'),
+            goal: document.getElementById('goal-val'),
+            bulkPrice: document.getElementById('bulk-price-val'),
+            bulkServings: document.getElementById('bulk-servings-val'),
+            singlePrice: document.getElementById('single-price-val'),
+            portions: document.getElementById('portions-val'),
+            energy: document.getElementById('energy-val'),
+            clarity: document.getElementById('clarity-val'),
+            stress: document.getElementById('stress-val'),
+            days: document.getElementById('days-val'),
+            target: document.getElementById('target-val'),
+            consistency: document.getElementById('consistency-val'),
+            adherence: document.getElementById('adherence-val'),
+            adherence2: document.getElementById('adherence2-val')
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                e.target.classList.add('active');
+                currentTab = e.target.dataset.tab;
+                document.getElementById(currentTab).classList.add('active');
+                
+                updateCalculations();
+            });
+        });
+
+        // Slider event listeners
+        Object.keys(sliders).forEach(key => {
+            if (sliders[key]) {
+                sliders[key].addEventListener('input', () => {
+                    updateDisplays();
+                    updateCalculations();
+                });
+            }
+        });
+
+        function updateDisplays() {
+            displays.weight.textContent = sliders.weight.value + ' lbs';
+            
+            const activityLabels = ['Sedentary', 'Light', 'Moderate', 'Active', 'Very Active'];
+            displays.activity.textContent = activityLabels[sliders.activity.value - 1];
+            
+            displays.goal.textContent = sliders.goal.value + ' lb';
+            displays.bulkPrice.textContent = '$' + parseFloat(sliders.bulkPrice.value).toFixed(2);
+            displays.bulkServings.textContent = sliders.bulkServings.value;
+            displays.singlePrice.textContent = '$' + parseFloat(sliders.singlePrice.value).toFixed(2);
+            displays.portions.textContent = sliders.portions.value;
+            displays.energy.textContent = sliders.energy.value;
+            displays.clarity.textContent = sliders.clarity.value;
+            displays.stress.textContent = sliders.stress.value;
+            displays.days.textContent = sliders.days.value + ' lbs';
+            displays.target.textContent = sliders.target.value + ' lbs';
+            displays.consistency.textContent = sliders.consistency.value + ' cal';
+            displays.adherence.textContent = sliders.adherence.value + ' cal';
+            displays.adherence2.textContent = sliders.adherence2.value + '%';
+        }
+
+        function getRecommendedCompounds(energy, clarity, stress) {
+            const recommendations = [];
+            
+            // Low energy recommendations
+            if (energy <= 4) {
+                recommendations.push(compounds.ginseng);
+                recommendations.push(compounds.cordyceps);
+            }
+            
+            // Mental clarity issues
+            if (clarity <= 4) {
+                recommendations.push(compounds.tulsi);
+                recommendations.push(compounds.schisandra);
+            }
+            
+            // High stress recommendations
+            if (stress >= 7) {
+                recommendations.push(compounds.ashwagandha);
+                recommendations.push(compounds.reishi);
+            }
+            
+            // Moderate issues - general support
+            if (energy <= 6 && clarity <= 6) {
+                recommendations.push(compounds.rhodiola);
+            }
+            
+            // Overall wellness support
+            if (energy >= 7 && clarity >= 7 && stress <= 4) {
+                recommendations.push(compounds.turmeric);
+            }
+            
+            // Remove duplicates
+            const unique = recommendations.filter((compound, index, self) => 
+                index === self.findIndex(c => c.name === compound.name)
+            );
+            
+            return unique.slice(0, 3); // Limit to 3 recommendations
+        }
+
+        function updateCalculations() {
+            const metricsDisplay = document.getElementById('metrics-display');
+            const compoundsContainer = document.getElementById('compounds-container');
+            const badgesContainer = document.getElementById('badges-container');
+            achievements = [];
+
+            if (currentTab === 'metabolism') {
+                const weight = parseInt(sliders.weight.value);
+                const activity = parseInt(sliders.activity.value);
+                const goal = parseFloat(sliders.goal.value);
+                
+                const bmr = calc.bmr(weight, true);
+                const tdee = calc.tdee(bmr, activity);
+                const deficit = calc.deficit(goal);
+                const targetCalories = tdee - deficit;
+                
+                const weeklyDeficit = deficit * 7;
+                const monthlyWeightLoss = goal * 4;
+                
+                results = {
+                    'Target Calories': targetCalories.toLocaleString(),
+                    'BMR': bmr.toLocaleString(),
+                    'TDEE': tdee.toLocaleString(),
+                    'Daily Deficit': deficit.toLocaleString(),
+                    'Weekly Deficit': weeklyDeficit.toLocaleString(),
+                    'Monthly Loss': monthlyWeightLoss + ' lbs'
+                };
+
+                if (targetCalories > 1200) achievements.push('Healthy Target');
+                if (goal <= 2) achievements.push('Realistic Goal');
+                if (activity >= 3) achievements.push('Active Lifestyle');
+
+                metricsDisplay.innerHTML = `
+                    <div class="metric-card metric-large">
+                        <div class="metric-label">Daily Calories</div>
+                        <div class="metric-value">${targetCalories.toLocaleString()}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">BMR</div>
+                        <div class="metric-value">${bmr.toLocaleString()}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Weekly Deficit</div>
+                        <div class="metric-value">${weeklyDeficit.toLocaleString()}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Monthly Loss</div>
+                        <div class="metric-value">${monthlyWeightLoss} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Activity Level</div>
+                        <div class="metric-value">${activity}/5</div>
+                    </div>
+                `;
+                compoundsContainer.innerHTML = '';
+            }
+            
+            else if (currentTab === 'savings') {
+                const bulkPrice = parseFloat(sliders.bulkPrice.value);
+                const bulkServings = parseInt(sliders.bulkServings.value);
+                const singlePrice = parseFloat(sliders.singlePrice.value);
+                const portions = parseInt(sliders.portions.value);
+                
+                const savings = calc.savings(bulkPrice, bulkServings, singlePrice, portions);
+                const perServingBulk = (bulkPrice / bulkServings).toFixed(2);
+                
+                results = {
+                    'Bulk Cost': '$' + savings.bulk,
+                    'Single Cost': '$' + savings.single,
+                    'You Save': '$' + savings.saved,
+                    'Savings %': savings.percent + '%',
+                    'Per Serving (Bulk)': '$' + perServingBulk,
+                    'Portions Used': portions
+                };
+
+                if (parseFloat(savings.saved) > 5) achievements.push('Smart Saver');
+                if (savings.percent > 25) achievements.push('Bulk Master');
+                if (portions >= bulkServings * 0.8) achievements.push('Full Utilization');
+
+                metricsDisplay.innerHTML = `
+                    <div class="metric-card metric-large">
+                        <div class="metric-label">Your Savings</div>
+                        <div class="metric-value">$${savings.saved}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Bulk Total</div>
+                        <div class="metric-value">$${savings.bulk}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Single Total</div>
+                        <div class="metric-value">$${savings.single}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Savings %</div>
+                        <div class="metric-value">${savings.percent}%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Per Serving</div>
+                        <div class="metric-value">$${perServingBulk}</div>
+                    </div>
+                `;
+                compoundsContainer.innerHTML = '';
+            }
+            
+            else if (currentTab === 'wellness') {
+                const energy = parseInt(sliders.energy.value);
+                const clarity = parseInt(sliders.clarity.value);
+                const stress = parseInt(sliders.stress.value);
+                
+                const wellness = calc.wellness(energy, clarity, stress);
+                const recommendedCompounds = getRecommendedCompounds(energy, clarity, stress);
+                
+                results = {
+                    'Wellness Score': wellness.score + '%',
+                    'Energy Level': energy + '/10',
+                    'Mental Clarity': clarity + '/10',
+                    'Stress Level': stress + '/10',
+                    'Balance Rating': wellness.score >= 70 ? 'Good' : wellness.score >= 50 ? 'Fair' : 'Needs Support',
+                    'Recommendations': recommendedCompounds.length
+                };
+
+                if (wellness.score >= 80) achievements.push('Wellness Champion');
+                if (energy >= 8) achievements.push('High Energy');
+                if (clarity >= 8) achievements.push('Sharp Mind');
+                if (stress <= 3) achievements.push('Stress Master');
+
+                metricsDisplay.innerHTML = `
+                    <div class="metric-card metric-large">
+                        <div class="metric-label">Wellness Score</div>
+                        <div class="metric-value">${wellness.score}%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Energy</div>
+                        <div class="metric-value">${energy}/10</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Clarity</div>
+                        <div class="metric-value">${clarity}/10</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Stress</div>
+                        <div class="metric-value">${stress}/10</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Balance</div>
+                        <div class="metric-value">${wellness.score >= 70 ? 'Good' : wellness.score >= 50 ? 'Fair' : 'Support'}</div>
+                    </div>
+                `;
+
+                // Display compound recommendations
+                if (recommendedCompounds.length > 0) {
+                    compoundsContainer.innerHTML = recommendedCompounds.map(compound => `
+                        <div class="compound-card">
+                            <div class="compound-name">${compound.name}</div>
+                            <div class="compound-benefit">${compound.benefits}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    compoundsContainer.innerHTML = '<div class="compound-card"><div class="compound-name">Optimal Balance</div><div class="compound-benefit">Your wellness levels are well-balanced. Continue your current routine!</div></div>';
+                }
+            }
+            
+            else if (currentTab === 'progress') {
+                const currentWeight = parseInt(sliders.days.value);
+                const targetWeight = parseInt(sliders.target.value);
+                const weeklyDeficit = parseInt(sliders.consistency.value);
+                const dailyCalorieIntake = parseInt(sliders.adherence.value);
+                const adherenceRate = parseInt(sliders.adherence2.value);
+                
+                // Calculate BMR and TDEE for realistic forecasting
+                const estimatedBMR = currentWeight * 10; // Simplified BMR calculation
+                const estimatedTDEE = estimatedBMR * 1.5; // Moderate activity level
+                
+                // Calculate actual daily deficit based on calorie intake
+                const plannedDailyDeficit = estimatedTDEE - dailyCalorieIntake;
+                const actualDailyDeficit = (plannedDailyDeficit * adherenceRate) / 100;
+                const actualWeeklyDeficit = actualDailyDeficit * 7;
+                
+                // Weight loss forecasting
+                const weightToLose = Math.max(0, currentWeight - targetWeight);
+                const deficitPerPound = 3500;
+                const weeksToGoal = weightToLose > 0 && actualWeeklyDeficit > 0 ? 
+                    Math.ceil((weightToLose * deficitPerPound) / actualWeeklyDeficit) : 0;
+                const monthsToGoal = Math.ceil(weeksToGoal / 4.33);
+                
+                // Success probability calculation
+                const safeWeeklyLoss = Math.min(2, weightToLose / 4); // Max 2 lbs/week or 25% of goal
+                const requiredWeeklyDeficit = safeWeeklyLoss * deficitPerPound;
+                const deficitRealistic = actualWeeklyDeficit <= requiredWeeklyDeficit * 1.2; // 20% tolerance
+                const calorieRealistic = dailyCalorieIntake >= 1200; // Minimum safe intake
+                const adherenceRealistic = adherenceRate >= 70;
+                
+                let successProbability = 0;
+                if (deficitRealistic) successProbability += 35;
+                if (calorieRealistic) successProbability += 25;
+                if (adherenceRealistic) successProbability += 25;
+                if (actualWeeklyDeficit > 0 && actualWeeklyDeficit <= 7000) successProbability += 15; // Safe range
+                
+                // Weekly and monthly projections
+                const weeklyLossRate = actualWeeklyDeficit / deficitPerPound;
+                const monthlyLossProjection = weeklyLossRate * 4.33;
+                
+                // Current vs Future Scenarios
+                const currentPaceMonths = weightToLose > 0 && weeklyLossRate > 0 ? 
+                    Math.ceil(weightToLose / monthlyLossProjection) : 0;
+                
+                // 3-month future projection
+                const threeMonthLoss = monthlyLossProjection * 3;
+                const futureWeight3Months = Math.max(targetWeight, currentWeight - threeMonthLoss);
+                const progressIn3Months = weightToLose > 0 ? Math.round(((currentWeight - futureWeight3Months) / weightToLose) * 100) : 100;
+                
+                // 6-month future projection
+                const sixMonthLoss = monthlyLossProjection * 6;
+                const futureWeight6Months = Math.max(targetWeight, currentWeight - sixMonthLoss);
+                const progressIn6Months = weightToLose > 0 ? Math.round(((currentWeight - futureWeight6Months) / weightToLose) * 100) : 100;
+                
+                results = {
+                    'Current Weight': currentWeight + ' lbs',
+                    'Target Weight': targetWeight + ' lbs',
+                    'Success Probability': Math.round(successProbability) + '%',
+                    'Time to Goal': currentPaceMonths + ' months',
+                    '3-Month Weight': Math.round(futureWeight3Months) + ' lbs',
+                    '6-Month Weight': Math.round(futureWeight6Months) + ' lbs',
+                    'Weekly Loss Rate': weeklyLossRate.toFixed(1) + ' lbs',
+                    'Monthly Loss': monthlyLossProjection.toFixed(1) + ' lbs',
+                    'Daily Deficit': Math.round(actualDailyDeficit) + ' cal',
+                    '3-Month Progress': progressIn3Months + '%',
+                    '6-Month Progress': progressIn6Months + '%'
+                };
+
+                // Achievement system
+                if (successProbability >= 85) achievements.push('High Success Rate');
+                if (adherenceRate >= 90) achievements.push('Excellent Adherence');
+                if (dailyCalorieIntake >= 1200 && dailyCalorieIntake <= 2200) achievements.push('Safe Intake');
+                if (weeklyLossRate >= 1 && weeklyLossRate <= 2) achievements.push('Healthy Pace');
+                if (actualDailyDeficit > 0) achievements.push('Creating Deficit');
+                if (weightToLose <= 10) achievements.push('Almost There');
+
+                const probabilityColor = successProbability >= 80 ? '#10b981' : 
+                                       successProbability >= 60 ? '#f59e0b' : '#ef4444';
+                
+                const forecastStatus = successProbability >= 80 ? 'Excellent Plan' :
+                                     successProbability >= 60 ? 'Good Strategy' :
+                                     successProbability >= 40 ? 'Needs Adjustment' : 'Challenging Plan';
+
+                metricsDisplay.innerHTML = `
+                    <div class="metric-card metric-large" style="background: linear-gradient(135deg, ${probabilityColor}, ${probabilityColor}dd);">
+                        <div class="metric-label">Success Probability</div>
+                        <div class="metric-value">${Math.round(successProbability)}%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Current Weight</div>
+                        <div class="metric-value">${currentWeight} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Target Weight</div>
+                        <div class="metric-value">${targetWeight} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">3-Month Weight</div>
+                        <div class="metric-value">${Math.round(futureWeight3Months)} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">6-Month Weight</div>
+                        <div class="metric-value">${Math.round(futureWeight6Months)} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Weekly Loss</div>
+                        <div class="metric-value">${weeklyLossRate.toFixed(1)} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Monthly Loss</div>
+                        <div class="metric-value">${monthlyLossProjection.toFixed(1)} lbs</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Time to Goal</div>
+                        <div class="metric-value">${currentPaceMonths}mo</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">3-Month Progress</div>
+                        <div class="metric-value">${progressIn3Months}%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">6-Month Progress</div>
+                        <div class="metric-value">${progressIn6Months}%</div>
+                    </div>
+                `;
+                compoundsContainer.innerHTML = '';
+            }
+
+            // Display achievements
+            badgesContainer.innerHTML = achievements.map(achievement => 
+                `<div class="achievement-badge">${achievement}</div>`
+            ).join('');
+        }
+
+        function copyResults() {
+            const button = document.querySelector('.copy-btn');
+            let text = `Health Calculator Results - ${currentTab.toUpperCase()}:\n\n`;
+            
+            Object.entries(results).forEach(([key, value]) => {
+                text += `${key}: ${value}\n`;
+            });
+            
+            if (achievements.length > 0) {
+                text += `\nAchievements: ${achievements.join(', ')}\n`;
+            }
+            
+            // Add compound recommendations if in wellness tab
+            if (currentTab === 'wellness') {
+                const compoundCards = document.querySelectorAll('.compound-card');
+                if (compoundCards.length > 0) {
+                    text += `\nNatural Support Recommendations:\n`;
+                    compoundCards.forEach(card => {
+                        const name = card.querySelector('.compound-name').textContent;
+                        const benefit = card.querySelector('.compound-benefit').textContent;
+                        text += `• ${name}: ${benefit}\n`;
+                    });
+                }
+            }
+            
+            text += `\nPowered by thehealthybuck.com`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('glow');
+                setTimeout(() => {
+                    button.textContent = 'Copy Results';
+                    button.classList.remove('glow');
+                }, 2000);
+            });
+        }
+
+        // Initialize
+        updateDisplays();
+        updateCalculations();
+
+        // Auto-save user preferences
+        setInterval(() => {
+            const prefs = {};
+            Object.keys(sliders).forEach(key => {
+                if (sliders[key]) {
+                    prefs[key] = sliders[key].value;
+                }
+            });
+            prefs.currentTab = currentTab;
+            prefs.lastVisit = Date.now();
+            localStorage.setItem('healthToolPrefs', JSON.stringify(prefs));
+        }, 5000);
+
+        // Load saved preferences
+        const savedPrefs = localStorage.getItem('healthToolPrefs');
+        if (savedPrefs) {
+            const prefs = JSON.parse(savedPrefs);
+            Object.keys(sliders).forEach(key => {
+                if (prefs[key] !== undefined && sliders[key]) {
+                    sliders[key].value = prefs[key];
+                }
+            });
+            if (prefs.currentTab) {
+                currentTab = prefs.currentTab;
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.tab === currentTab) {
+                        btn.classList.add('active');
+                    }
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === currentTab) {
+                        content.classList.add('active');
+                    }
+                });
+            }
+            updateDisplays();
+            updateCalculations();
+        }
+    </script>
+</body>
+</html>
